@@ -24,6 +24,8 @@ def endpoint(dto: ReqDto):
     for script in dto.scripts:
         print("----")
         print(f"script: {script}")
+        script.time_convert()
+        print(f"duration: {script.duration()}")
 
     ## TODO: Get source file from S3 by group_key
 
