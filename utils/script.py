@@ -1,14 +1,10 @@
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, time
 
 class Script(BaseModel):
-    start_time: str
-    end_time: str
+    start_time: time
+    end_time: time
     text: str
-
-    def time_convert(self):
-        self.start_time = datetime.strptime(self.start_time, "%H:%M:%S,%f").time()
-        self.end_time = datetime.strptime(self.end_time, "%H:%M:%S,%f").time()
 
     def duration(self):
         dt_st = datetime.combine(datetime.today(), self.start_time)
