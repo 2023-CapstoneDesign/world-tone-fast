@@ -26,14 +26,3 @@ def google_translate(\
     )
 
     return [translation.translated_text for translation in response.translations]
-
-
-
-print(google_translate(\
-    texts=[\
-        "안녕하세요. 여러분.",\
-        "오늘은 파이썬을 배워봅시다.",\
-        "파이썬은 재미있어요."],\
-    source_language="ko-KR",\
-    target_language="en-US"))
-
