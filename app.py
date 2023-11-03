@@ -26,9 +26,9 @@ def endpoint(dto: ReqDto):
         print(f"script: {script}")
         print(f"duration: {script.duration()}")
 
-    ## TODO: Get source file from S3 by group_key
-
     ## TODO: Translate scripts
+
+    ## TODO: Get source file from S3 by group_key
 
     ## TODO: Create TTS file from translated scripts
 
