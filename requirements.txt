@@ -13,6 +13,7 @@ google-cloud-translate==3.12.1
 googleapis-common-protos==1.61.0
 grpcio==1.59.2
 grpcio-status==1.59.2
+gTTS==2.4.0
 h11==0.14.0
 idna==3.4
 proto-plus==1.22.3
