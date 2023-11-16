@@ -20,7 +20,7 @@ def google_translate(\
             "parent": parent,
             "contents": texts,
             "mime_type": "text/plain",
-            "source_language_code": source_language,
+            # "source_language_code": source_language,
             "target_language_code": target_language,
         }
     )
