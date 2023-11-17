@@ -4,7 +4,8 @@ from typing import List
 from utils.script import Script
 
 import uuid
-
+import utils.tts as tts
+import utils.googleTranslate as gt
 
 app = FastAPI()
 
@@ -20,16 +21,34 @@ def endpoint(dto: ReqDto):
     print(f"original language: {dto.original_language}")
     print(f"target language: {dto.target_language}")
 
-    print("scripts:")
+    print("\n==================\nscripts:")
     for script in dto.scripts:
         print("----")
         print(f"script: {script}")
+        print(f"duration: {script.duration_self()}")
+
+    # Translate scripts
+    translated_texts = gt.google_translate( \
+        texts= \
+        list(map(lambda script: script.text, dto.scripts)), \
+        source_language=dto.original_language, \
+        target_language=dto.target_language)
+
+    for script, translated_text in zip(dto.scripts, translated_texts):
+        script.text = translated_text
+
+    ## 번역은 성공했으니, 우선 주석처리하고 시간에 맞춘 TTS 파일 생성부터 해보자
+
+    print("\n==================\ntranslated scripts:")
+    for script in dto.scripts:
+        print("----")
+        print(f"script: {script}")
+        print(f"duration: {script.duration_self()}")
 
     ## TODO: Get source file from S3 by group_key
 
-    ## TODO: Translate scripts
-
     ## TODO: Create TTS file from translated scripts
+    tts.tts_create(dto.scripts, dto.target_language)
 
     ## TODO: Apply VC model to TTS file
 
