@@ -1,11 +1,14 @@
 from google.cloud import texttospeech
 from pydub import AudioSegment
+from dotenv import load_dotenv
 
 import os
 import io
 
+load_dotenv()
+
 # Google Cloud 서비스를 사용하기 위한 인증 정보
-credentials_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_PATH")
+credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_PATH")
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
 
 ## text와 language_code를 받아서 tts를 생성하고 AudioSegment를 반환
