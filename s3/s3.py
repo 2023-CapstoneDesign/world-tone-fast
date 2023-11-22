@@ -1,10 +1,7 @@
 import boto3
 from botocore.exceptions import ClientError
 import os
-from fastapi import FastAPI, HTTPException, Response, UploadFile, status
 import uvicorn
-
-app = FastAPI()
 
 aws_access_key = os.environ.get("AWS_ACCESS_KEY")
 aws_secret_key = os.environ.get("AWS_SECRET_KEY")
@@ -28,32 +25,24 @@ async def s3_download(key: str):
     except ClientError as err:
         print(str(err))
 
-@app.get('/download')
 async def download(folder_name: str | None = None):
     if not folder_name:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail='No folder name provided'
-        )
+        return "FAIL"
     response = s3.list_objects(Bucket=s3_bucket_name, Prefix=folder_name)
     objects = response.get("Contents", [])
     print("objects : ", objects)
     object_keys = [obj["Key"] for obj in objects]
     print("objects_keys : ", object_keys)
     contents = [await s3_download(key=obj_key) for obj_key in object_keys]
-    return Response(
-        content="SUCCESS",
-    )
+    return "SUCCESS"
 
 async def s3_upload(local_file_path: str, s3_object_key: str):
     try:
-        print("3")
         s3.upload_file(local_file_path, s3_bucket_name, s3_object_key)
-        print("3")
-    except ClientError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to upload to S3: {str(e)}")
+    except ClientError as err:
+        print(str(err))
+        raise Exception(f"Failed to upload to S3: {str(err)}")
 
-@app.post('/upload')
 async def upload(file_name: str | None = None) :
     local_file_path = os.path.join("tmp", file_name)
     try:
@@ -61,12 +50,9 @@ async def upload(file_name: str | None = None) :
         s3_object_key = f"uploads/{file_name}"
         await s3_upload(local_file_path, s3_object_key)
 
-        # 파일 스트림 반환
-        return Response(
-            content="SUCCESS"
-        )
+        return "SUCCESS"
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="File not found")
+        raise Exception("File not found")
 
 if __name__ == '__main__':
     uvicorn.run(app='main:app', reload=True)
