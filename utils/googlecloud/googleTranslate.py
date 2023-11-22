@@ -1,16 +1,19 @@
 from google.cloud import translate
+from dotenv import load_dotenv
 
 import os
 
+load_dotenv()
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/dongbin/Documents/Google_Cloud/cellular-ring-399104-5f689ce94d19.json"
+# Google Cloud 서비스를 사용하기 위한 인증 정보
+credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_PATH")
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
 
-def google_translate(\
-        texts=["Hello, world!"], \
-        project_id="cellular-ring-399104", \
-        source_language="ko-KR", \
-        target_language="en-US"):
+# Google Cloud 서비스를 사용하기 위한 프로젝트 ID
+project_id = os.getenv("GOOGLE_APPLICATION_PROJECT_ID")
 
+## texts와 language_code를 받아서 번역된 texts를 반환
+def google_translate(texts, target_language):
     client = translate.TranslationServiceClient()
     location = "global"
     parent = f"projects/{project_id}/locations/{location}"
@@ -20,7 +23,6 @@ def google_translate(\
             "parent": parent,
             "contents": texts,
             "mime_type": "text/plain",
-            # "source_language_code": source_language,
             "target_language_code": target_language,
         }
     )
