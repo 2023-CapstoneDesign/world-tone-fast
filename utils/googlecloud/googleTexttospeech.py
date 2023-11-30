@@ -12,12 +12,21 @@ credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_PATH")
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
 
 ## text와 language_code를 받아서 tts를 생성하고 AudioSegment를 반환
-def generate_tts(text, language_code, speaking_rate=1.0) -> AudioSegment:
+def generate_tts(text, gender, language_code, speaking_rate=1.0) -> AudioSegment:
+
+    if gender.lower() == "male":
+        ssml_gender = texttospeech.SsmlVoiceGender.MALE
+    elif gender.lower() == "female":
+        ssml_gender = texttospeech.SsmlVoiceGender.FEMALE
+    else:
+        ssml_gender = texttospeech.SsmlVoiceGender.NEUTRAL
+
     client = texttospeech.TextToSpeechClient()
     synthesis_input = texttospeech.SynthesisInput(text=text)
 
     voice = texttospeech.VoiceSelectionParams(
         language_code=language_code,
+        ssml_gender=ssml_gender,
     )
 
     audio_config = texttospeech.AudioConfig(

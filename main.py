@@ -16,6 +16,7 @@ logger = logging.getLogger("uvicorn")
 
 class ReqDto(BaseModel):
     group_key: uuid.UUID
+    gender: str
     saved_key: uuid.UUID
     target_language: str
     scripts: List[Script]
@@ -37,8 +38,9 @@ async def endpoint(dto: ReqDto):
     ## Enhance ref audio file
 
     ## Create TTS file from translated scripts
-    src_file = tts.tts_create(dto.scripts, dto.target_language, str(dto.saved_key))
+    src_file = tts.tts_create(dto.scripts, dto.gender, dto.target_language, str(dto.saved_key))
     logger.info(src_file)
+
     ## TODO: Apply VC model to TTS file
 
     ## TODO: Upload TTS file to S3

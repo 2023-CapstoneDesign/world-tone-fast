@@ -8,14 +8,14 @@ import os
 logger = logging.getLogger("uvicorn")
 
 ## 싱크에 맞춘 TTS 생성
-def tts_create(scripts, lang, file_name):
+def tts_create(scripts, gender, lang, file_name):
     result_audio_seg = AudioSegment.empty()
 
     for i in range(len(scripts)):
-        cs_audio_seg = generate_tts(scripts[i].text, lang)
+        cs_audio_seg = generate_tts(scripts[i].text, gender, lang)
         result = get_sync_speed(cs_audio_seg, scripts[i].duration_self())
         if result[0] == 1:
-            cs_audio_seg = generate_tts(scripts[i].text, lang, result[1])
+            cs_audio_seg = generate_tts(scripts[i].text, gender, lang, result[1])
         else:
             cs_audio_seg = cs_audio_seg + AudioSegment.silent(duration=result[1])
         result_audio_seg = result_audio_seg + cs_audio_seg
