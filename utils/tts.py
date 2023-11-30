@@ -18,7 +18,8 @@ def tts_create(scripts, lang, file_name):
         if scripts[i] != scripts[-1]:
             result_audio_seg = result_audio_seg + AudioSegment.silent(
                 duration=scripts[i].duration_other(scripts[i+1]))
-    result_audio_seg.export("/temp/tts/" + file_name + ".wav", format="wav")
+    result_audio_seg.export("/tmp/tts/" + file_name + ".wav", format="wav")
+    return "/tmp/tts/" + file_name + ".wav"
 
 ## 싱크를 맞추기 위한 속도 계산
 def get_sync_speed(audio_seg, target_duration):

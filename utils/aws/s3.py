@@ -25,10 +25,10 @@ async def s3_download(key: str):
     except ClientError as err:
         print(str(err))
 
-async def download(folder_name: str | None = None):
-    if not folder_name:
+async def download(group_key: str | None = None):
+    if not group_key:
         return "FAIL"
-    response = s3.list_objects(Bucket=s3_bucket_name, Prefix=folder_name)
+    response = s3.list_objects(Bucket=s3_bucket_name, Prefix=group_key)
     objects = response.get("Contents", [])
     print("objects : ", objects)
     object_keys = [obj["Key"] for obj in objects]
@@ -43,14 +43,14 @@ async def s3_upload(local_file_path: str, s3_object_key: str):
         print(str(err))
         raise Exception(f"Failed to upload to S3: {str(err)}")
 
-async def upload(file_name: str | None = None) :
+async def upload(file_name: str, saved_key: str | None = None) :
     local_file_path = os.path.join("tmp", file_name)
     try:
         # S3에 업로드
-        s3_object_key = f"uploads/{file_name}"
+        s3_object_key = "uploads/" + saved_key
         await s3_upload(local_file_path, s3_object_key)
 
-        return "SUCCESS"
+        return s3_object_key
     except FileNotFoundError:
         raise Exception("File not found")
 
