@@ -8,11 +8,11 @@ import uuid
 import utils.tts as tts
 import utils.googlecloud.googleTranslate as gt
 import utils.aws.s3 as s3
-import model.deepfilternet as df
-import model.knnvc as vc
-import utils.audio as audio
+import logging
 
 app = FastAPI()
+
+logger = logging.getLogger("uvicorn")
 
 class ReqDto(BaseModel):
     group_key: uuid.UUID
@@ -21,7 +21,7 @@ class ReqDto(BaseModel):
     scripts: List[Script]
 
 @app.post("/endpoint")
-def endpoint(dto: ReqDto):
+async def endpoint(dto: ReqDto):
 
     ## Translate scripts
     translated_texts = gt.google_translate(
@@ -31,26 +31,24 @@ def endpoint(dto: ReqDto):
         script.text = translated_text
 
     ## Get source file from S3 by group_key
-    s3.download(dto.group_key)
+    logger.info(str(dto.group_key))
+    await s3.download(str(dto.group_key))
 
     ## Enhance ref audio file
-    ref_file = audio.combine_files(dto.group_key, "/tmp/ref", "/tmp/content/ref_audio")
-    ref_enhanced_file = df.enhance_ref_voice(ref_file)
 
     ## Create TTS file from translated scripts
-    src_file = tts.tts_create(dto.scripts, dto.target_language, dto.saved_key)
-
+    src_file = tts.tts_create(dto.scripts, dto.target_language, str(dto.saved_key))
+    logger.info(src_file)
     ## TODO: Apply VC model to TTS file
-    result = vc.voice_conversion(ref_enhanced_file, src_file, dto.saved_key)
 
     ## TODO: Upload TTS file to S3
-    object_key = s3.upload(result, dto.saved_key)
+    object_key = await s3.upload(src_file, str(dto.saved_key))
 
     ## Delete TTS file and target voice file from local
-    if os.path.exists("/tmp/tts/" + dto.saved_key + ".wav"):
-        os.remove("/tmp/tts/" + dto.saved_key + ".wav")
-    if os.path.exists("/tmp/voice/" + dto.group_key + ".wav"):
-        os.remove("/tmp/voice/" + dto.group_key + ".wav")
+    if os.path.exists("/tmp/tts/" + str(dto.saved_key) + ".wav"):
+        os.remove("/tmp/tts/" + str(dto.saved_key) + ".wav")
+    if os.path.exists("/tmp/voice/" + str(dto.group_key) + ".wav"):
+        os.remove("/tmp/voice/" + str(dto.group_key) + ".wav")
 
     ## Return s3_saved_key
     return {"created": object_key}

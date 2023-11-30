@@ -2,6 +2,9 @@ import boto3
 from botocore.exceptions import ClientError
 import os
 import uvicorn
+import logging
+
+logger = logging.getLogger("uvicorn")
 
 aws_access_key = os.environ.get("AWS_ACCESS_KEY")
 aws_secret_key = os.environ.get("AWS_SECRET_KEY")
@@ -16,7 +19,7 @@ s3 = boto3.client(
 
 async def s3_download(key: str):
     try:
-        local_file_path = os.path.join("tmp", key)  # 로컬 파일 경로 설정
+        local_file_path = os.path.join("tmp/aws", key)  # 로컬 파일 경로 설정
         os.makedirs(os.path.dirname(local_file_path), exist_ok=True)  # 디렉토리 생성
 
         # S3 객체 다운로드
@@ -25,15 +28,17 @@ async def s3_download(key: str):
     except ClientError as err:
         print(str(err))
 
-async def download(folder_name: str | None = None):
-    if not folder_name:
+async def download(group_key: str | None = None):
+    if not group_key:
+        logger.info("FAIL")
         return "FAIL"
-    response = s3.list_objects(Bucket=s3_bucket_name, Prefix=folder_name)
+    response = s3.list_objects(Bucket=s3_bucket_name, Prefix=group_key)
     objects = response.get("Contents", [])
-    print("objects : ", objects)
+    logger.info(objects)
     object_keys = [obj["Key"] for obj in objects]
-    print("objects_keys : ", object_keys)
+    logger.info(object_keys)
     contents = [await s3_download(key=obj_key) for obj_key in object_keys]
+    logger.info("SUCCESS")
     return "SUCCESS"
 
 async def s3_upload(local_file_path: str, s3_object_key: str):
@@ -43,14 +48,14 @@ async def s3_upload(local_file_path: str, s3_object_key: str):
         print(str(err))
         raise Exception(f"Failed to upload to S3: {str(err)}")
 
-async def upload(file_name: str | None = None) :
-    local_file_path = os.path.join("tmp", file_name)
+async def upload(file_name: str, saved_key: str | None = None) :
+    #local_file_path = os.path.join("tmp", file_name)
     try:
         # S3에 업로드
-        s3_object_key = f"uploads/{file_name}"
-        await s3_upload(local_file_path, s3_object_key)
+        s3_object_key = "uploads/" + saved_key
+        await s3_upload(file_name, s3_object_key)
 
-        return "SUCCESS"
+        return s3_object_key
     except FileNotFoundError:
         raise Exception("File not found")
 
