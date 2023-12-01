@@ -29,7 +29,7 @@ print("4")
 enhanced = enhance(model, df_state, audio)
 print("5")
 
-output_path = "/tmp/content/ref_enhanced.wav"
+output_path = "tmp/content/ref_enhanced.wav"
 print("6")
 
 # Ensure the directory exists
