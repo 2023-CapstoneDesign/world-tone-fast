@@ -8,7 +8,7 @@ import os
 logger = logging.getLogger("uvicorn")
 
 ## 싱크에 맞춘 TTS 생성
-def tts_create(scripts, gender, lang, file_name):
+def tts_create(scripts, gender, lang, file_name, group_key):
     result_audio_seg = AudioSegment.empty()
 
     for i in range(len(scripts)):
@@ -22,12 +22,11 @@ def tts_create(scripts, gender, lang, file_name):
         if scripts[i] != scripts[-1]:
             result_audio_seg = result_audio_seg + AudioSegment.silent(
                 duration=scripts[i].duration_other(scripts[i+1]))
-    local_file_path = os.path.join("tmp/tts", file_name)
+    local_file_path = os.path.join("tmp/"+group_key+"/tts", file_name)
     os.makedirs(os.path.dirname(local_file_path), exist_ok=True)  # 디렉토리 생성
 
     result_audio_seg.export(local_file_path + ".wav", format="wav")
-    logger.info("tmp/tts/" + file_name + ".wav")
-    return "tmp/tts/" + file_name + ".wav"
+    return local_file_path + ".wav"
 
 ## 싱크를 맞추기 위한 속도 계산
 def get_sync_speed(audio_seg, target_duration):
